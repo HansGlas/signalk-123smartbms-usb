@@ -32,6 +32,7 @@ class BMS(object):
         self._cell_communication_error = 1
         self._allowed_to_charge = 0
         self._allowed_to_discharge = 0
+        self._energy_stored = 0
 
     async def connect(self):
         self._serial_loop_task = self._loop.create_task(self._serial_read(self._port))
@@ -114,6 +115,10 @@ class BMS(object):
     def allowed_to_discharge(self):
         return self._allowed_to_discharge
 
+    @property
+    def energy_stored(self):
+        return self._energy_stored
+
     async def _serial_read(self, port):
         reader, _ = await serial_asyncio.open_serial_connection(url=port, baudrate=9600)
 
@@ -139,7 +144,7 @@ class BMS(object):
                     
                 received_checksum = buf[BMS_COMM_BLOCK_SIZE-1]
                 if (checksum & 0xff) == received_checksum:
-                    self._pack_voltage = self._decode_voltage(buf[0:3])
+                    self._pack_voltage = self._decode_voltage(buf[1:3])
                     self._charge_current = self._decode_current(buf[3:6])
                     self._discharge_current = self._decode_current(buf[6:9])
                     self._pack_current = self._decode_current(buf[9:12])
@@ -153,6 +158,7 @@ class BMS(object):
                     self._highest_cell_temperature = self._decode_temperature(buf[21:23])
                     self._highest_cell_temperature_num = buf[23]
                     self._cell_count = buf[25]
+                    self._energy_stored = self._decode_Wh(buf[35:37])
                     self._cell_communication_error = True if (buf[30] & 0b00000100) else False
                     self._allowed_to_discharge = True if (buf[30] & 0b00000010) else False
                     self._allowed_to_charge = True if (buf[30] & 0b00000001) else False
@@ -178,3 +184,6 @@ class BMS(object):
     
     def _millis(self):
         return int(time.time() * 1000)
+        
+    def _decode_Wh(self, raw_value):
+        return round(int.from_bytes(raw_value[0:2], byteorder='big', signed=False)/1000,3)

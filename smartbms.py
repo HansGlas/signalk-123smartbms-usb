@@ -39,26 +39,26 @@ async def monitor(config):
                     "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
                     "values": [
 			{"path":
-                        f"electrical.batteries.{instance.id}.voltage", "value": str(instance.bms.pack_voltage)},
+                        f"electrical.batteries.{instance.id}.voltage", "value": instance.bms.pack_voltage},
 			{"path":
-                        f"electrical.batteries.{instance.id}.current", "value": str(instance.bms.pack_current)},
+                        f"electrical.batteries.{instance.id}.current", "value": instance.bms.pack_current},
 			{"path":
-                        f"electrical.batteries.{instance.id}.stateOfCharge", "value": str(instance.bms.soc)},
+                        f"electrical.batteries.{instance.id}.capacity.stateOfCharge", "value": instance.bms.soc},
 			{"path":
-                        f"electrical.batteries.{instance.id}.lowestCellVoltage", "value": str(instance.bms.lowest_cell_voltage)},
+                        f"electrical.batteries.{instance.id}.lowestCellVoltage", "value": instance.bms.lowest_cell_voltage},
 			{"path":
-                        f"electrical.batteries.{instance.id}.highestCellVoltage", "value": str(instance.bms.highest_cell_voltage)},
+                        f"electrical.batteries.{instance.id}.highestCellVoltage", "value": instance.bms.highest_cell_voltage},
 			{"path":
-                        f"electrical.batteries.{instance.id}.allowedToCharge", "value": str(int(instance.bms.allowed_to_charge))},
+                        f"electrical.batteries.{instance.id}.allowedToCharge", "value": instance.bms.allowed_to_charge},
 			{"path":
-                        f"electrical.batteries.{instance.id}.allowedToDischarge", "value": str(int(instance.bms.allowed_to_discharge))},
+                        f"electrical.batteries.{instance.id}.allowedToDischarge", "value": instance.bms.allowed_to_discharge},
 			{"path":
-                        f"electrical.batteries.{instance.id}.communicationError", "value": str(
-                            int(
+                        f"electrical.batteries.{instance.id}.eneryStored", "value": instance.bms.energy_stored},
+			{"path":
+                        f"electrical.batteries.{instance.id}.communicationError", "value": 
                                 instance.bms.cell_communication_error
                                 or instance.bms.serial_communication_error
-                            )
-                        )},
+                        },
                     ],
                 }]
             }
