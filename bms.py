@@ -15,6 +15,7 @@ class BMS(object):
         self._serial_loop_task = None
         self._port = port
         self._last_received = 0
+        self._pack_capacityNominal = 0
         self._pack_voltage = 0
         self._charge_current = 0
         self._discharge_current = 0
@@ -39,6 +40,10 @@ class BMS(object):
     
     async def disconnect(self):
         self._serial_loop_task.cancel()
+
+    @property
+    def pack_capacityNominal(self):
+        return self._pack_capacityNominal
 
     @property
     def pack_voltage(self):
@@ -162,6 +167,8 @@ class BMS(object):
                     self._cell_communication_error = True if (buf[30] & 0b00000100) else False
                     self._allowed_to_discharge = True if (buf[30] & 0b00000010) else False
                     self._allowed_to_charge = True if (buf[30] & 0b00000001) else False
+                    self._pack_capacityNominal = self._decode_capacity(buf[50:51])
+
 
     def _decode_current(self, raw_value):
         if raw_value[0] == ord('X'):
@@ -177,13 +184,16 @@ class BMS(object):
           #  voltage = int.from_bytes(raw_value[0:3], byteorder='big', signed=False)
         #else:
         voltage = int.from_bytes(raw_value, byteorder='big', signed=False) 
-        return round(0.005*voltage,2)
+        return round(0.005*voltage,1)
 
     def _decode_temperature(self, raw_value):
-        return round(int.from_bytes(raw_value[0:2], byteorder='big', signed=False)*0.857-232,0)
+        return round(int.from_bytes(raw_value[0:2], byteorder='big', signed=False)*0.857-232+274.15,0)
     
     def _millis(self):
         return int(time.time() * 1000)
         
     def _decode_Wh(self, raw_value):
-        return round(int.from_bytes(raw_value[0:2], byteorder='big', signed=False)/1000,3)
+        return round(int.from_bytes(raw_value, byteorder='big', signed=False)*3600,0)
+
+    def _decode_capacity(self, raw_value):
+        return round(int.from_bytes(raw_value, byteorder='big', signed=False)*360000,0)

@@ -1,5 +1,5 @@
 import sys
-import datetime
+from datetime import datetime, timezone
 import argparse
 import asyncio
 from bms import BMS
@@ -36,7 +36,7 @@ async def monitor(config):
                         "type": "USB",
                         "src": instance.port,
                     },
-                    "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+                    "timestamp": datetime.now(timezone.utc).isoformat().replace('+00:00', "Z"),
                     "values": [
 			{"path":
                         f"electrical.batteries.{instance.id}.voltage", "value": instance.bms.pack_voltage},
@@ -45,15 +45,23 @@ async def monitor(config):
 			{"path":
                         f"electrical.batteries.{instance.id}.capacity.stateOfCharge", "value": instance.bms.soc},
 			{"path":
+                        f"electrical.batteries.{instance.id}.capacity.nominal", "value": instance.bms.pack_capacityNominal},
+			{"path":
                         f"electrical.batteries.{instance.id}.lowestCellVoltage", "value": instance.bms.lowest_cell_voltage},
 			{"path":
                         f"electrical.batteries.{instance.id}.highestCellVoltage", "value": instance.bms.highest_cell_voltage},
+			{"path":
+                        f"electrical.batteries.{instance.id}.highestCellVoltageNum", "value": instance.bms.highest_cell_voltage_num},
+			{"path":
+                        f"electrical.batteries.{instance.id}.temperature", "value": instance.bms.highest_cell_temperature},
+			{"path":
+                        f"electrical.batteries.{instance.id}.temperatureNum", "value": instance.bms.highest_cell_temperature_num},
 			{"path":
                         f"electrical.batteries.{instance.id}.allowedToCharge", "value": instance.bms.allowed_to_charge},
 			{"path":
                         f"electrical.batteries.{instance.id}.allowedToDischarge", "value": instance.bms.allowed_to_discharge},
 			{"path":
-                        f"electrical.batteries.{instance.id}.eneryStored", "value": instance.bms.energy_stored},
+                        f"electrical.batteries.{instance.id}.capacity.remaining", "value": instance.bms.energy_stored},
 			{"path":
                         f"electrical.batteries.{instance.id}.communicationError", "value": 
                                 instance.bms.cell_communication_error
